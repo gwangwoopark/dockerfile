@@ -1,7 +1,7 @@
-FROM ubuntu:20.04
+FROM ubuntu:18.04
 
 ARG USER_NAME="gwangwoo"
-ARG GROUP_NAME="gwangwoo"
+ARG GROUP_NAME="group"
 ARG USER_PASSWORD="welcome!"
 ARG HOME="/home/${USER_NAME}"
 ARG DEBIAN_FRONTEND=noninteractive
@@ -12,6 +12,8 @@ ARG GIT_EMAIL="gwangwoo.park@gmail.com"
 # ENV USER_NAME ${USER_NAME}
 # ENV USER_PASSWORD ${USER_PASSWORD}
 # ENV GROUP_NAME ${GROUP_NAME}
+
+WORKDIR /tmp_config
 
 # install the tooks i wish to use
 RUN apt-get update && \
@@ -30,8 +32,13 @@ RUN apt-get install -y zsh \
   neovim \
   tmux \
   tig \
-  jq \
-  bat
+  jq 
+#  bat
+
+ARG VER_BAT="0.16.0"
+RUN wget https://github.com/sharkdp/bat/releases/download/v${VER_BAT}/bat_${VER_BAT}_amd64.deb
+RUN dpkg -i bat_${VER_BAT}_amd64.deb
+RUN rm bat_${VER_BAT}_amd64.deb
 
 RUN apt-get install -y python3-pip
   
@@ -84,5 +91,26 @@ WORKDIR ${HOME}
 RUN git config --global user.name ${GIT_USER} \
   && git config --global user.email ${GIT_EMAIL} \
   && git config --global core.editor "vim"
+
+# Anaconda installing
+RUN wget https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
+RUN bash Anaconda3-2020.07-Linux-x86_64.sh -b
+RUN rm Anaconda3-2020.07-Linux-x86_64.sh
+
+# Set path to conda
+#ENV PATH /root/anaconda3/bin:$PATH
+ENV PATH ${HOME}/anaconda3/bin:$PATH
+
+# Updating Anaconda packages
+RUN conda update conda
+RUN conda update anaconda
+RUN conda update --all
+
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.36.0/install.sh | zsh
+RUN export NVM_DIR="$HOME/.nvm" \
+  && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
+  && [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" \
+  && nvm install node \
+  && npm install yarn -g
 
 ENTRYPOINT [ "/bin/zsh" ]
