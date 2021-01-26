@@ -1,6 +1,6 @@
 # ZSH
 
-font 
+font는 $(HOME)/.fonts 에 저장함
 
 [NERD FONTS](https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/Meslo/M/Regular/complete)
 
